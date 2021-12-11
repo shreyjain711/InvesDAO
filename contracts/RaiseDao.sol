@@ -15,6 +15,9 @@ contract RaiseDao is Ownable {
   uint constant disputablePeriod = 1 weeks;
   uint constant minDisputeCollateral = 100 ether;
 
+  mapping (address => uint) depositorBank;
+  address[] depositors;
+  
   enum DAOStatus {VOTING, EXECUTING}
   enum proposalStatus {ACTIVE, DISPUTED, ACCEPTED}
 
@@ -74,6 +77,8 @@ contract RaiseDao is Ownable {
   function applyForMembership() payable public membershipAvailable currentlyRaising {
     require(msg.value <= yetToBeRaised, "Not enough membership tokens available");
     yetToBeRaised -= msg.value;
+    depositorBank[msg.sender] = msg.value;
+    depositors.push(msg.sender);
     companyToken.transfer(msg.sender, msg.value); 
     emit TransferReceived(msg.sender, msg.value);
   }
@@ -172,7 +177,11 @@ contract RaiseDao is Ownable {
   }
 
   function disbandDAO() internal onlyOwner currentlyRaising {
-    // TODO: send back MATIC as received from everyone
+    address payable curr;
+    for(uint i = 0; i < depositors.length; i++) {
+      curr = payable(depositors[i]);
+      curr.transfer(depositorBank[depositors[i]] * 1 ether);
+    }
   }
 
   function makeBoardDAO() internal onlyOwner currentlyRaising {
