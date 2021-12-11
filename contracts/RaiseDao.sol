@@ -149,11 +149,11 @@ contract RaiseDao is Ownable {
   }
 
   // string memory, string memory, string memory, string memory, address memory, string memory
-  function pickTopProposal() internal onlyOwner currentlyRaising returns(int) {
+  function pickTopProposal() internal view onlyOwner currentlyRaising returns(int) {
     int winnerPropsalId;
     int maxSupport = -1;
     for(int i = -1; i < int(proposals.length); i++) {
-      if(int(proposalVotes[i]) > maxSupport) {
+      if(int(proposalVotes[i]) > maxSupport && proposals[i].status == proposalStatus.ACTIVE) {
         maxSupport = int(proposalVotes[i]);
         winnerPropsalId = i;
       }
@@ -172,7 +172,7 @@ contract RaiseDao is Ownable {
       return false;
     }
 
-    makeBoardDAO();
+    makeBoardDAO(uint(topProposal));
     return true;
   }
 
@@ -184,7 +184,7 @@ contract RaiseDao is Ownable {
     }
   }
 
-  function makeBoardDAO() internal onlyOwner currentlyRaising {
+  function makeBoardDAO(uint _proposalId) internal onlyOwner currentlyRaising {
     // TODO: make the BoardDAO - send all MATIC to it, get back a token
   }
 }
