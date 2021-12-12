@@ -1,14 +1,29 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useParams } from "react-router-dom";
 import ProposalList from './proposals/ProposalList';
 import data from "../data.json";
 import ProposalForm from './proposals/ProposalForm';
 import { Typography } from '@mui/material'; 
+import dao from '../dao'
 
 const ProjectDetail = () => {
 
-   const [ toDoList, setToDoList ] = useState(data);
+   const [ toDoList, setToDoList ] = useState([]);
    const { id } = useParams();
+
+   useEffect(async () => {
+    var numOfProposals = await dao.methods.getNumOfProposals().call();
+    numOfProposals = numOfProposals[0];
+    const proposalList = [];
+    for(let i = 0; i < numOfProposals; i++) {
+        const res = await dao.methods.getProposalDetails(i).call();
+        proposalList.push(res);
+    }
+
+    setToDoList(proposalList)
+
+    console.log(proposalList);
+    }, []);
 
    const addTask = (userInput ) => {
 

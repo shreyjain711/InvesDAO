@@ -1,0 +1,72 @@
+.FileUpload .nav {
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: #333;
+    justify-content: center;
+  }
+  
+  .FileUpload .avatar {
+    background: none;
+    border-radius: 5px;
+    width: 45px; height: 45px;
+    background: #f3f3f3;
+    display: flex; 
+    justify-content: center;
+    align-content: center;
+  }
+  
+  .FileUpload button.link {
+    border-radius: 5px;
+    height: 45px;
+    display: block; 
+    align-items: center; 
+    justify-content: center;
+    background: none;
+    cursor: pointer;
+    color: #8f95ff;
+    font-size: 12px;
+    outline: 0;
+  }
+  
+  .FileUpload .avatar svg {
+    width: 45px; height: 45px;
+  }
+  
+  .FileUpload .rendering {
+    opacity: 0.1
+  }
+  
+  .FileUpload .dropzone-container {
+    border-radius: 5px;
+    width: 155px; height: 45px;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-around;
+    background: #f3f3f3;
+    cursor: pointer;
+    outline: 0;
+  }
+  
+  .FileUpload .dropzone-container .dropzone {
+    outline: 0;
+  }
+  .FileUpload .dropzone-container .dropzone span {
+    vertical-align: middle;
+    margin-right: 10px;
+    font-size: 10px;
+    font-weight: 100;
+    color: #bbb;
+  }
+  
+  .FileUpload .dropzone-container:hover {
+    background: #ddd;
+  }
+  
+  .FileUpload .dropzone-container .icon{
+    background: none;
+    color: #8f95ff;
+    outline: 0;
+  }
+  .FileUpload .dropzone-container .icon:hover{
+    background: none;
+  }

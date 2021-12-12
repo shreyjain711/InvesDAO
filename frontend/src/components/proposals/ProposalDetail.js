@@ -1,18 +1,7 @@
-import React, {useState} from 'react';
-import { useParams } from "react-router-dom";
-import data from "../../data.json";
+import {Client, Identity, KeyInfo} from '@textile/hub';
 
-const ProposalDetail = () => {
-
-   const [ toDoList, setToDoList ] = useState(data);
-   const { proposalId } = useParams();
-
-   return (
-       <div>
-           <h1>Proposal {proposalId}</h1>
-           <p>About the proposal</p>
-       </div>
-   );
-};
- 
-export default ProposalDetail;
+async function authorize (key: KeyInfo, identity: Identity) {
+  const client = await Client.withKeyInfo(key)
+  await client.getToken(identity)
+  return client
+}
