@@ -3,36 +3,115 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import "./Ownable.sol";
 import "./Token.sol";
+import "./RaiseDao.sol";
 
-contract BoardDao is Ownable, ERC20Burnable {
-  address creator;
+contract BoardDao is Ownable {
+  RaiseDao daoContract;
+  address dao;
   address creator;
   address invesDao;
 
-  Token companyBank;
+  address raiseDaoToken;
+  
+  mapping (address => uint) voteBank;
 
-  uint constant votingPeriod = 2 weeks;
-  uint constant disputablePeriod = 1 weeks;
-  uint constant disputeCollateral = ;
-  uint constant quorumSuccessPeriod;
-  uint256 constant initialSupply = 100;
+  Token boardToken;
 
-  struct Proposal {
-    uint64 amountToBeDebited;
+  uint256 constant boardSize = 100;
+  
+  enum BoardProposalStatus {VOTING, ACCEPTED, DECLINED}
+
+  struct BoardProposal {
+    string title;
     string purpose;
     address creator;
-    address payable recipient;
+    address recipient;
+    uint amountRequired;
+    int support;
+    BoardProposalStatus status;
   }
 
-  Proposal[] public proposals;
+  BoardProposal[] public proposals;
 
   constructor(
-    string memory name,
-    string memory symbol,
-    address owner
-  ) ERC20(name, symbol) {
-      dao_admin = owner;
-      _mint(dao_admin, initialSupply);
+    address _creator,
+    address _invesDao,
+    uint _daoOwnership,
+    uint _creatorOwnership,
+    uint _invesDaoOwnership,
+    string memory _tokenName,
+    string memory _tokenSymbol,
+    address _raiseDaoToken
+  ) {
+    daoContract = RaiseDao(msg.sender);
+    dao = (msg.sender);
+    invesDao = _invesDao;
+    creator = _creator;
+    boardToken = new Token(_tokenName, _tokenSymbol, 100);
+    voteBank[dao] = _daoOwnership;
+    voteBank[_creator] = _creatorOwnership;
+    voteBank[_invesDao] = _invesDaoOwnership;
+    raiseDaoToken = _raiseDaoToken;
+  }
+
+  modifier hasNativeToken() {
+    require(address(this).balance > 0);
+    _;
+  }
+
+  function mintBoardVotes() external onlyOwner hasNativeToken {
+    uint totalStake = voteBank[dao] + voteBank[creator] + voteBank[invesDao];
+    boardToken.transfer(dao, ((voteBank[dao] * 100) / totalStake) * (10 ** 18));
+    boardToken.transfer(dao, ((voteBank[creator] * 100) / totalStake) * (10 ** 18));
+    boardToken.transfer(dao, ((voteBank[invesDao] * 100) / totalStake) * (10 ** 18));
+  }
+
+  modifier isBoardMember() {
+    require(boardToken.balanceOf(msg.sender) > 0 ether);
+    _;
+  }
+
+  modifier proposalUpForVoting (uint _proposalId) {
+    require(proposals[_proposalId].status == BoardProposalStatus.VOTING);
+    _;
+  }
+
+  modifier proposalAccepted (uint _proposalId) {
+    require(proposals[_proposalId].status == BoardProposalStatus.ACCEPTED);
+    _;
+  }
+
+  function createProposal(string memory _title, string memory _purpose, address _recipient, uint _amountRequired) public isBoardMember {
+    require(address(this).balance >= _amountRequired, "Not enough balance");
+    proposals.push(BoardProposal(_title, _purpose, msg.sender, _recipient, _amountRequired, 0, BoardProposalStatus.VOTING));
+    daoContract.createBoardProposal(_title, _purpose, _recipient, _amountRequired);
+    
+  }
+
+  function voteForProposal(uint _proposalId, bool isInFavour) external payable isBoardMember proposalUpForVoting(_proposalId) {
+    require(boardToken.balanceOf(msg.sender) > 0);
+    if (isInFavour == true) {
+      proposals[_proposalId].support += int(boardToken.balanceOf(msg.sender));
+    } else {
+      proposals[_proposalId].support -= int(boardToken.balanceOf(msg.sender));
+    }
+  }
+  
+  function decideOnProposal(uint _proposalId) external proposalUpForVoting(_proposalId) {
+    require(msg.sender == proposals[_proposalId].creator);
+    if (proposals[_proposalId].support > 0) {
+      proposals[_proposalId].status = BoardProposalStatus.ACCEPTED;
+      executeProposal(_proposalId);
+    }
+  }
+
+  function executeProposal(uint _proposalId) internal proposalAccepted(_proposalId) {
+    address payable recipient = payable(proposals[_proposalId].recipient);
+    recipient.transfer(proposals[_proposalId].amountRequired);
+  }
+
+  function getTokenAddress() public view returns(address) {
+    return address(boardToken);
   }
 
 }
