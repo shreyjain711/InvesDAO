@@ -1,0 +1,8 @@
+const membershipSuccessful = await Contract.methods.applyForMembership().send({
+    from: <get account number some way>,
+    value: value (in wei)
+});
+
+const voteSuccessful = await Contract.methods.getNumOfProposals().call();
+
+getRaiseDaoTokenAddress()
