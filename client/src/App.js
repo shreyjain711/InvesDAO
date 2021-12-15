@@ -19,7 +19,7 @@ class App extends Component {
 
       // Get the contract instance.
       // const addresses = ['0x444816C8254D4A738D28622390A4f5A523ec604E', '0x716F58B8310EceEA95Eb35d29CB4d97753C59bA3 ', '0x66Bc10De618dAF267ca24a8FC1AeeBF2ced70030'];
-      const addresses = ['0xa8b916C847f17F3aA8c34e3c895662ba7Bd64b9f'];
+      const addresses = ['0x61A9E1fc10593fE681934C37d21599931441CBC3', '0xaEF1780E0Bc5a9164ABdf4c3b812075670EA713F', '0x12d0b8170F8E6cE1285ca8DECB041a3f40DdEf3f'];
       const instances = [];
       for (let i in addresses){
         const instance = await new web3.eth.Contract(RaiseDao.abi, addresses[i])
@@ -69,7 +69,9 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1>InvesDAO!</h1>
+        <div>
+          <h1>InvesDAO!</h1>
+        </div>
         <CreateRaiseDaoCardLayout alldaos={this.state.raiseDaos} />
       </div>
     );
